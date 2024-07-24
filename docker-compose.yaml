@@ -1,0 +1,47 @@
+version: '3.8'
+services:
+  database:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: database
+    env_file:
+      - ./.env
+
+    ports:
+      - 1433:1433
+    volumes:
+      - data:var/opt/mssql
+
+
+  backend:
+    build: ./backend
+    container_name: backend
+    env_file:
+      - ./.env
+    ports:
+      - 4000:4000
+    volumes:
+      - ./backend:/app
+      - /app/node-modules
+
+    depends_on:
+      - database
+
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - 4200:4200
+    
+    stdin_open: true
+
+    tty: true
+    volumes:
+      - ./frontend/src:/app/src
+    depends_on:
+      - backend
+
+
+
+volumes:
+  data:
